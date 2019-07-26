@@ -89,7 +89,8 @@ searchList : String -> List String
 searchList word =
 --    List.filter (String.startsWith word) words
     let
-        hasPrefix = String.startsWith word
+--        hasPrefix = String.startsWith word
+        hasPrefix = String.contains  word
     in
         List.filter hasPrefix words    
 

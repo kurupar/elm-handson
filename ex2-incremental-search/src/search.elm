@@ -1,9 +1,9 @@
 module Main exposing (Model, Msg(..), initialModel, main, update, view, viewInput, viewList, viewListItem, words)
 
 import Browser
-import Html exposing (Html, div, h1, input, li, text, ul)
-import Html.Attributes exposing (type_, value)
-import Html.Events exposing (onInput)  -- この行を追加
+import Html exposing (..)
+import Html.Attributes exposing (type_, value, checked)
+import Html.Events exposing (onInput,onCheck)  -- この行を追加
 
 
 -- Main
@@ -23,12 +23,14 @@ main =
 
 type alias Model =
     { inputText : String
+     ,partialMatch : Bool
     }
 
 
 initialModel : Model
 initialModel =
     { inputText = ""
+     , partialMatch =False
     }
 
 
@@ -38,7 +40,8 @@ initialModel =
 
 type Msg
     = NoOp
-    | InputText String
+    | InputText String 
+    | Change Bool
 
 
 update : Msg -> Model -> Model
@@ -49,7 +52,9 @@ update msg model =
         -- 入力された文字をinputTextに代入
         InputText str ->
             {model | inputText = str }
-
+        Change  flag ->
+            {model | partialMatch = flag }
+        
 
 
 -- View
@@ -59,25 +64,34 @@ view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "Incremental Search" ]
+        --, input [ type_ "checkbox"] [text " Search"]
+        , viewCheckBox model
         , viewInput model
-        , viewList model.inputText
+        , viewList model.inputText model.partialMatch
+        ]
+        
+viewCheckBox : Model -> Html Msg
+viewCheckBox model =
+    div []
+        [ input [ type_ "checkbox" , checked model.partialMatch , onCheck Change] []
+        , text "Partial Match"
         ]
 
 
 viewInput : Model -> Html Msg
 viewInput model =
     div []
-        [ input [ type_ "text", value model.inputText, onInput InputText ] []
+        [ input [ type_ "text", value model.inputText  ,  onInput InputText ] []
         , text model.inputText
         ]
 
 
-viewList : String -> Html Msg
-viewList word =
+viewList : String -> Bool  -> Html Msg
+viewList word flag =
     ul [] <|
 --        List.map viewListItem words
 --        List.map viewListItem (searchList word)
-        List.map viewListItem <| searchList word
+        List.map viewListItem <| searchList word flag
 
 
 viewListItem : String -> Html Msg
@@ -85,15 +99,20 @@ viewListItem word =
     li [] [ text word ]
 
 -- 検索関数
-searchList : String -> List String
-searchList word =
+searchList : String -> Bool -> List String
+searchList word flag=
 --    List.filter (String.startsWith word) words
-    let
---        hasPrefix = String.startsWith word
-        hasPrefix = String.contains  word
-    in
-        List.filter hasPrefix words    
-
+    if flag then    
+        let
+            hasPrefix = String.contains word
+        in
+            List.filter hasPrefix words    
+    else
+        let
+            hasPrefix = String.startsWith  word
+        in
+            List.filter hasPrefix words    
+    
 
 -- Data
 

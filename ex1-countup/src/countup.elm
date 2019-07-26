@@ -42,7 +42,8 @@ init =
 
 type Msg
     = Increment
-
+    | Reset
+    | Decrement
 
 
 -- update : アクション(Msg)が発生したときに、現在のモデルから新しいモデルを作る関数
@@ -53,6 +54,15 @@ update msg model =
     case msg of
         Increment ->
             { model | count = model.count + 1 }
+        Reset ->
+            { model | count = 0 } 
+        Decrement ->
+            if model.count == 0  then
+                { model | count = model.count } 
+            else
+                { model | count = model.count - 1 }
+                            
+--            count = model.count == 0 ? model.count :: model.count - 1 }
 
 
 
@@ -64,4 +74,6 @@ view model =
     div []
         [ p [] [ text <| String.fromInt model.count ]
         , button [ onClick Increment ] [ text "+1" ]
+        , button [ onClick Reset ] [ text "reset" ]
+        , button [ onClick Decrement ] [ text "-1" ]
         ]
